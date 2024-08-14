@@ -5,13 +5,17 @@ Generating Figure 4:
     1) Optionally create a python virtual environment to install the necessary python packages: python -m venv <PATH/TO/VIRTUAL/ENVIRONMENT>
         a) Start your virtual environment: source <PATH/TO/VIRTUAL/ENVIRONMENT>/bin/activate
     2) Install required python packages: pip install -r requirements.txt
+        a) Also install jupyter if you don't have it. *Note older version of jupyter may require you to manually enable ipywidgets, see: https://ipywidgets.readthedocs.io/en/8.1.3/user_install.html
     3) Start up a Jupyter notebook: jupyter notebook
     4) Run all cells of the generate_figure_4.ipynb
 
-*Notes: you must place the intermediary data files top_influencers_<bias>.csv, user_map_<2016|2020>.pkl, and infl_affiliation_map.json | infl_affiliation_map_no_handles.json into a ./data directory.
+Note:
+The script will need to be pointed at where the required data files are, by default it expects them in ../data/maps, ../data/influencers, ../data/affilliations
 
 
 
+Generating from raw data:
+This section covers how to generate, from raw data, the data files used by this script.
 
 Install required packages
     1) pip install -r requirements.txt
@@ -23,12 +27,15 @@ To generate the intermediary files:
     1) Generate retweet network:
         Note: these scripts live in the Retweet_network folder in the OSF repository.
         a) Run generate_retweet_networks.py 
-            i) NOTE you need to modify the constants in the script to point to the raw twitter data on your machine. There are also variables on how many threads to use that you may want to tune to your machine.
-           ii) This method can be slow and some tuning of the constants (like dask worker memory, the scratch directory for memory spill, etc.. ) may be required.
+            i) NOTE you need to modify the constants in the script to point to the raw twitter data on your machine. There are also variables on how many threads to use that 
+               you may want to tune to your machine. 16 or 32 workers should be fine.
+           ii) You will likely need to point the WORKING_DIR variable to a directory with > 50GB
+               of disk space. The final step of merging retweet and tweet edges requires the workers have adequet disk space.
           iii) Previously generated versions of these files exist in the Retweet_Network folder of the OSF data repository.
         
         Output: This code will generate the url classified edgelists of the retweet network, for use in CI calculations. Thes files are called: <bias>_retweet_edges.csv, there is one for each bias.
     
+
     2) Compute Collective Influence:
         Note: these scripts live in the Collective_Influence folder in the OSF repository.
         a) Run setup.py
@@ -39,12 +46,14 @@ To generate the intermediary files:
         
         Output: This will produce the <bias>_<year>_ci.gt files used to compute the top_influencer_<bias>.csv files used to make figure 4.
 
+
     3) Generate User Mappings:
         Note: the script needed here is the Similarity Matrix folder
         a) Run assemble_user_maps.py
             i) You will need to set target_dir in this script to point at the raw 2020 users.csv files.
 
         Output: After running this script you will have generated the user_map_2016.pkl and user_map_2020.pkl files.
+
 
     4) Find the Top Influencers:
         Note the script you need is in the Retweet_Network directory of the provided code.
@@ -57,9 +66,3 @@ To generate the intermediary files:
 Notes:
     1) Since we never provided any requirements.txt it is hard to say which versions of packages were used. I managed to get the code working and have provided all necessary packages in the requirements txt
         i) any additional packages (like graph-tool) that may need to be instaalled in other ways are also listed with the target version
-    2) Minor code changes were necessary for some of the scripts
-        i) graph-tool's remove_parallel_edges and remove_self_loops methods were moved from graph_tool.stats to graph_tool.generation. I updated the import accordingly
-       ii) the retweet netowrk generation code may require a larger amount of disk space for workers than the default tmp directory can accomadate. I added a constant to set a path to where the workers can spill
-           memory to disk. The workers need about ~50GB of disk space for the final merging of retweet and tweets.
-      iii) Collective_Influence's setup.py seemed to need a pyproject.toml to install anything. Likely just an issue with my environment, but doesn't hurt to add.
-       iv) compute_CI_retweet_networks.py only computes the the CI for one given entwork at a time. I modified slightly to be given a directory and grab the expected files and generate all bias networks at once.
