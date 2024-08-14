@@ -3,12 +3,11 @@
 # This script is responsible for generating the retweet networks using the raw tweet / retweet data.
 #
 ####################################################################################################
-
+import dask
 from dask.distributed import Client, LocalCluster, progress
 import dask.dataframe as dd
 import time
 import pickle
-import graph_tool.all as gt
 from multiprocessing import Pool
 from datetime import datetime
 import os
@@ -19,9 +18,13 @@ import numpy as np
 # MODIFY BASED ON YOUR SYSTEM
 NUM_WORKERS = 32
 THREADS_PER_WORKER = 1
-MAX_MEMORY_USED = '256GB'
-WORKING_DIR = '~/working'
-WRITE_DIR = 'out/retweet_networks'
+MAX_MEMORY_USED = '32GB'
+WORKING_DIR = '../working'
+WRITE_DIR = '../out/retweet_networks'
+PROCESSES = True
+# To drop_duplicates or merge you may need to provide more temporary disk space to dask, if set the TMP_DIR variable points
+# to the directory that dask will use as memory spill space for its workers, >60GB
+TMP_DIR = './tmp'
 
 # Start and end date of our considered tweet time range
 start_date = datetime(2020, 6, 1)
@@ -49,7 +52,7 @@ def gather_retweet_edges_v2(tweet_dir, retweet_dir):
     # load tweets
     tweet_data = dd.read_csv(os.path.join(tweet_dir, '*.csv'), delimiter=',', usecols=['tweet_id', 'created_at'],
                              dtype={'tweet_id': str, 'created_at': str}
-                             ).rename(columns={'tweet_id': 'id',  'created_at': 'timestamp'})
+                             ).rename(columns={'tweet_id': 'id',  'created_at': 'timestamp'}).repartition(partition_size='100MB')
 
     # convert id to int and set as index
     tweet_data = tweet_data[tweet_data['id'] != 'id']
@@ -65,7 +68,7 @@ def gather_retweet_edges_v2(tweet_dir, retweet_dir):
 
     # remove duplicates
     partitions = tweet_data.npartitions
-    tweet_data = tweet_data.drop_duplicates(subset='id').repartition(npartitions=partitions).persist(retries=100)
+    tweet_data = tweet_data.drop_duplicates(subset='id',split_out=partitions).repartition(npartitions=partitions).persist(retries=100)
     progress(tweet_data); print("Tweets: Dropped duplicates")
 
     # set index
@@ -77,7 +80,7 @@ def gather_retweet_edges_v2(tweet_dir, retweet_dir):
     retweet_data = dd.read_csv(os.path.join(retweet_dir, '*.csv'), delimiter=',',
                                usecols=['tweet_id', 'retweet_id', 'auth_id', 'infl_id'],
                                dtype={'tweet_id': str, 'retweet_id': str, 'auth_id': str, 'infl_id': str}
-                               ).rename(columns={'tweet_id': 'id', 'user_id': 'auth_id'})
+                               ).rename(columns={'tweet_id': 'id', 'user_id': 'auth_id'}).repartition(partition_size='100MB')
 
     # convert string columns to int
     retweet_data = dask_str_col_to_int(retweet_data, 'id').persist(retries=100)
@@ -85,7 +88,7 @@ def gather_retweet_edges_v2(tweet_dir, retweet_dir):
 
     # remove duplicates
     partitions = retweet_data.npartitions
-    retweet_data = retweet_data.drop_duplicates(subset='id').repartition(npartitions=partitions).persist(retries=100)
+    retweet_data = retweet_data.drop_duplicates(subset='id',split_out=partitions).repartition(npartitions=partitions).persist(retries=100)
     progress(retweet_data); print("Retweets: Dropped duplicates")
 
     # set index
@@ -186,9 +189,13 @@ def gather_edges():
 
 
 def main():
-    cluster = LocalCluster(n_workers=NUM_WORKERS, threads_per_worker=THREADS_PER_WORKER,
+    if TMP_DIR:
+        dask.config.set(temporary_directory=TMP_DIR)
+
+    cluster = LocalCluster(n_workers=NUM_WORKERS, threads_per_worker=THREADS_PER_WORKER, processes=PROCESSES,
                            scheduler_port=0, dashboard_address=None, memory_limit=MAX_MEMORY_USED)
     client = Client(cluster)
+
     print("Starting Retweet Network Generation")
     outer_stime = time.time()
     gather_edges()
