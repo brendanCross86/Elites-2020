@@ -26,20 +26,23 @@ import graph_tool.all as gt
 
 import numpy as np
 
+# Edit to point
+OUT_PATH = '../data/ci_output' #'/path/to/generate_ci/graphs'
+
 def format_graph_file(file, year):
     file = file.split('/')
     file = file[-1]
     file = file.split('.')
-    return '/path/to/generate_ci/graphs/' + str(year) + '/' + file[0] + '_ci.gt'
+    return OUT_PATH + '/graphs/' + str(year) + '/' + file[0] + '_ci.gt'
 
 def format_pickle_file(file, year, direction):
     file = file.split('/')
     file = file[-1]
     file = file.split('.')
-    return '/path/to/generate_ci/output/' + str(year) + '/' + file[0] + '_' + direction + '_ci.pkl'
+    return OUT_PATH + '/output/' + str(year) + '/' + file[0] + '_' + direction + '_ci.pkl'
 
 def add_CI_to_graph(file, year):
-    
+
     print('pid ' + str(os.getpid()) + ' loading file ' + file)
     
     graph = gt.load_graph(file)
@@ -80,4 +83,10 @@ if __name__ == "__main__":
         fname = sys.argv[1]
         year = sys.argv[2]
 
+        # create output directory structure
+        os.makedirs(os.path.join(OUT_PATH, 'graphs', '2016'), exist_ok=True)
+        os.makedirs(os.path.join(OUT_PATH, 'graphs', '2020'), exist_ok=True)
+        os.makedirs(os.path.join(OUT_PATH, 'output', '2016'), exist_ok=True)
+        os.makedirs(os.path.join(OUT_PATH, 'output', '2020'), exist_ok=True)
+        
         add_CI_to_graph(fname, year)

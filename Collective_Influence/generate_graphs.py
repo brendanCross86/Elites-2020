@@ -15,7 +15,11 @@
 # limitations under the License.
 
 import graph_tool as gt
-import graph_tool.stats as gts
+#import graph_tool.stats as gts
+import graph_tool.generation as gtg
+
+# Edit this to point at your <bias>_retweet_edges.csv files.
+BASE_PATH = '../data'
 
 def load_graph_csv(file, stance, year, for_ci = True):
     print('Reading csv')
@@ -47,22 +51,23 @@ def load_graph_csv(file, stance, year, for_ci = True):
     G.gp['name'] = G.new_graph_property('string', stance + '_' + str(year))
 
     if for_ci: # remove parallel edges for CI analysis
-        gts.remove_parallel_edges(G)
-        gts.remove_self_loops(G)
+        gtg.remove_parallel_edges(G)
+        gtg.remove_self_loops(G)
 
-    G.save('data/' + str(year) + '/' + stance + '_' + str(year) + '.gt')
+    G.save('../data/' + str(year) + '/' + stance + '_' + str(year) + '.gt')
 
 if __name__ == '__main__':
     # EDIT THIS
-    base_path = '/path/to/url_classified_edgelists/'
+    base_path = '../data/'
 
-    # years = [2016, 2020]
-    years = [2020]
+    years = [2016, 2020]
+    #years = [2016]#[2020]
 
-    stances = ['center', 'extreme_bias_left', 'extreme_bias_right', 'fake', 'lean_left', 'lean_right', 'left', 'right']
+    #stances = ['center', 'extreme_bias_left', 'extreme_bias_right', 'fake', 'lean_left', 'lean_right', 'left', 'right']
+    stances = ['center', 'left_extreme', 'right_extreme', 'fake', 'left_leaning', 'right_leaning', 'left', 'right']
 
     for year in years:
         for stance in stances:
-            fname = base_path + str(year) + '/' + stance + '_' + str(year) + '.csv'
+            fname = base_path + str(year) + '/' + stance + '_' + 'retweet_edges.csv'
             print(fname)
             load_graph_csv(fname, stance, year)
