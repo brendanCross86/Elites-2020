@@ -25,6 +25,7 @@ import sys
 user_map = {}
 
 target_dir = '/path/to/raw/users/'
+out_dir = '../maps/'
 
 fnames = [f for f in listdir(target_dir) if isfile(join(target_dir, f))]
 
@@ -53,7 +54,8 @@ for fname in fnames:
 print('Map size:', len(user_map))
 print(25073877, 'is', user_map[25073877])
 
-pickle.dump(user_map, open('maps/user_map_2020.pkl', 'wb'))
+#pickle.dump(user_map, open('maps/user_map_2020.pkl', 'wb'))
+pickle.dump(user_map, open(out_dir + 'user_map_2020.pkl', 'wb'))
 
 print('Assembling 2016 user map')
 
@@ -61,7 +63,8 @@ import sqlite3
 
 user_map = {}
 
-conn = sqlite3.connect('/path/to/2016_election_sqlite3/data/complete_trump_vs_hillary_db.sqlite')
+SQL_PATH = '/path/to/2016_election_sqlite3/data/complete_trump_vs_hillary_db.sqlite'
+conn = sqlite3.connect(SQL_PATH)
 c = conn.cursor()
 
 for row in c.execute('SELECT * FROM influencer_rank_date'):
@@ -77,4 +80,5 @@ for row in c.execute('SELECT * FROM influencer_rank_date'):
 print('Map size:', len(user_map))
 print(25073877, 'is', user_map[25073877])
 
-pickle.dump(user_map, open('maps/user_map_2016.pkl', 'wb'))
+#pickle.dump(user_map, open('maps/user_map_2016.pkl', 'wb'))
+pickle.dump(user_map, open(out_dir + 'user_map_2016.pkl', 'wb'))
