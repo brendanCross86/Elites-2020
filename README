@@ -17,7 +17,8 @@ Generating Figure 5:
            also, the code generates both networks separately. We can do what we did in figure 4, svg side by side them and then add the code from my full influencer retweet network diagram
     1) analyze_retweet_networks.py
         a) Run for years 2016 and 2020 by setting the 'year' variable to either '2016' or '2020'. 
-        b) be sure to modify locations
+        b) point USER_MAPS_<year> variables to the output of the "Generate User Mappings" step in the provided guide on generating intermediary files from raw data provided at the end of this document
+        c) point the network_dir variable to the output of the "Compute Collective Influence" step in the provided guide on generating intermediary files from raw data provided at the end of this document
 
     2) draw_combined_retweet_graphs.py
         a) Run for 2016 and 2020 by setting year variable.
@@ -49,9 +50,7 @@ Generating Figure 5:
         c) modify the SAVE_DIR to where you want the output
 
     8) merge_finish_figure_5.py
-        a) This is a convenience script to recreate the manual steps of putting both pdf files side by side and adding a legend.
-        b) point this script to the generated pdfs of the previous step
-        c) 
+        a) point this script to the generated pdfs of the previous step
 
 # additional packages steps 4,5
 Installing collected packages: llvmlite, numba
@@ -59,9 +58,11 @@ Successfully installed llvmlite-0.43.0 numba-0.60.0
 
 
 Generating Figure 3:
-    Notes: Found this in /home/flamij2/elites2/analysis/user_analysis
-           I am going to provide the script to generate and then the link_map.pkl and missing_users.pkl files as input data. I will ask Alex about providing the code to create link maps
-           Link maps, as a reminder, are a mapping of the id number of a twitter account and their twitter url to access their page.
+    Note: Figure 3 related scripts are located in the Figure_3 directory
+    1) Run analyze_answers.py
+        a) point the user_data variable to the directory containing provided missing_users.pkl and link_map.pkl
+        b) point the influencer_data variable to the output of get_top_100_unweighted_influencers.py
+        c) point the infl_classification_surveys variable to the survey_0.xlsx - survey_8.xlsx provided in the Influencers_Classification data directory in osf. 
     
 
 Generating from raw data:

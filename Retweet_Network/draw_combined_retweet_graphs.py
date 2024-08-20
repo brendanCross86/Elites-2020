@@ -22,9 +22,12 @@ import pandas as pd
 import numpy as np
 
 
-year = '2020'#'2016'
+year = '2016'#'2020'
 save_dir =  '../data/urls/{}/'.format(year)
 network_dir = '../data/ci_output/graphs/{}/'.format(year)
+
+# create the output directory
+os.makedirs(os.path.join(save_dir, 'retweet_graphs_to_draw'), exist_ok=True)
 
 # dark color for max k_out
 colors_max = {'fake'  :  '#633517',
@@ -56,8 +59,10 @@ colors_min = {'fake'  :  '#ED8E53',
 media_types = {
     '2020': ['fake', 'right_extreme', 'right', 'right_leaning',
              'center', 'left_leaning', 'left', 'left_extreme'],
-    '2016': ['fake', 'extreme_bias_right', 'right', 'lean_right',
-             'center', 'lean_left', 'left', 'extreme_bias_left']
+    #'2016': ['fake', 'extreme_bias_right', 'right', 'lean_right',
+    #         'center', 'lean_left', 'left', 'extreme_bias_left']
+    '2016': ['fake', 'right_extreme', 'right', 'right_leaning',
+             'center', 'left_leaning', 'left', 'left_extreme']
                }
 
 media_type_to_group = {

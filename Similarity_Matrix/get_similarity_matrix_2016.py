@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pickle
-from os import listdir
+from os import listdir, makedirs
 from os.path import isfile, join
 import collections
 import sys
@@ -25,14 +25,19 @@ from numba import njit
 from numba import types
 from numba.typed import Dict
 
+influencer_dir = '../data/influencers/top_100/'
+raw_retweets_2016 = '/home/pub/hernan/Election_2016/complete_trump_vs_hillary_db.sqlite' # '/path/to/2016_election_sqlite3/data/complete_trump_vs_hillary_db.sqlite'
+save_dir = '../data/similarity'
+
+biases = ['fake', 'right_extreme', 'right', 'right_leaning', 'center', 'left_leaning', 'left', 'left_extreme']
+
 def get_top_n_influencers(top_n = 33):
-    btarget_dir = "/path/to/top_100_influencer_pkls/"
-    bnames = [f for f in listdir(btarget_dir) if isfile(join(btarget_dir, f))]
+    bnames = [f for f in listdir(influencer_dir) if isfile(join(influencer_dir, f))]
     top_influencers = []
     for bname in bnames:
         if '2016' in bname:
             influencer_name = bname.replace('top_100_', '').replace('_2016.pkl', '')
-            target_influencers = pickle.load(open(btarget_dir + bname, 'rb'))
+            target_influencers = pickle.load(open(influencer_dir + bname, 'rb'))
             top_influencers = top_influencers + list(target_influencers.keys())[:100]
 
     top_influencers = dict(collections.Counter(top_influencers))
@@ -48,16 +53,16 @@ def get_top_n_influencers(top_n = 33):
 
 def get_joined_top_n_by_news(top_n = 5):
     keep_order = True
-    btarget_dir = "/path/to/top_100_influencer_pkls/"
-    
-    bnames = ['top_100_fake_2020.pkl', 'top_100_extreme_bias_right_2020.pkl', 'top_100_right_2020.pkl', 'top_100_lean_right_2020.pkl', 'top_100_center_2020.pkl', 'top_100_lean_left_2020.pkl', 'top_100_left_2020.pkl', 'top_100_extreme_bias_left_2020.pkl']    
+
+    #bnames = ['top_100_fake_2020.pkl', 'top_100_extreme_bias_right_2020.pkl', 'top_100_right_2020.pkl', 'top_100_lean_right_2020.pkl', 'top_100_center_2020.pkl', 'top_100_lean_left_2020.pkl', 'top_100_left_2020.pkl', 'top_100_extreme_bias_left_2020.pkl']    
+    bnames = ['top_100_{}_2020.pkl'.format(bias) for bias in biases]
     top_influencers_2020 = []
     influencer_tags_2020 = []
     for bname in bnames:
         if '2020' in bname:
             print('Loading', bname)
             influencer_name = bname.replace('top_100_', '').replace('_2020.pkl', '')
-            target_influencers = pickle.load(open(btarget_dir + bname, 'rb'))
+            target_influencers = pickle.load(open(influencer_dir + bname, 'rb'))
             target_influencers = list(target_influencers.keys())[:top_n]
             for influencer in target_influencers:
                 if influencer not in top_influencers_2020:
@@ -70,14 +75,15 @@ def get_joined_top_n_by_news(top_n = 5):
     for i, influencer in enumerate(top_influencers_2020):
         tag_map_2020[influencer] = influencer_tags_2020[i]
 
-    bnames = ['top_100_fake_2016.pkl', 'top_100_extreme_bias_right_2016.pkl', 'top_100_right_2016.pkl', 'top_100_lean_right_2016.pkl', 'top_100_center_2016.pkl', 'top_100_lean_left_2016.pkl', 'top_100_left_2016.pkl', 'top_100_extreme_bias_left_2016.pkl']
+    #bnames = ['top_100_fake_2016.pkl', 'top_100_extreme_bias_right_2016.pkl', 'top_100_right_2016.pkl', 'top_100_lean_right_2016.pkl', 'top_100_center_2016.pkl', 'top_100_lean_left_2016.pkl', 'top_100_left_2016.pkl', 'top_100_extreme_bias_left_2016.pkl']
+    bnames = ['top_100_{}_2016.pkl'.format(bias) for bias in biases]
     top_influencers_2016 = []
     influencer_tags_2016 = []
     for bname in bnames:
         if '2016' in bname:
             print('Loading', bname)
             influencer_name = bname.replace('top_100_', '').replace('_2016.pkl', '')
-            target_influencers = pickle.load(open(btarget_dir + bname, 'rb'))
+            target_influencers = pickle.load(open(influencer_dir + bname, 'rb'))
             target_influencers = list(target_influencers.keys())[:top_n]
             for influencer in target_influencers:
                 if influencer not in top_influencers_2016:
@@ -117,16 +123,16 @@ def add_extra_influencers():
     return user_ids, user_tags
 
 def get_top_n_by_news(top_n = 5, add_extra=False):
-    btarget_dir = "/path/to/top_100_influencer_pkls/"
-    
-    bnames = ['top_100_fake_2016.pkl', 'top_100_extreme_bias_right_2016.pkl', 'top_100_right_2016.pkl', 'top_100_lean_right_2016.pkl', 'top_100_center_2016.pkl', 'top_100_lean_left_2016.pkl', 'top_100_left_2016.pkl', 'top_100_extreme_bias_left_2016.pkl']
+    #bnames = ['top_100_fake_2016.pkl', 'top_100_extreme_bias_right_2016.pkl', 'top_100_right_2016.pkl', 'top_100_lean_right_2016.pkl', 'top_100_center_2016.pkl', 'top_100_lean_left_2016.pkl', 'top_100_left_2016.pkl', 'top_100_extreme_bias_left_2016.pkl']
+    bnames = ['top_100_{}_2016.pkl'.format(bias) for bias in biases]
+
     top_influencers = []
     influencer_tags = []
     for bname in bnames:
         if '2016' in bname:
             print('Loading', bname)
             influencer_name = bname.replace('top_100_', '').replace('_2016.pkl', '')
-            target_influencers = pickle.load(open(btarget_dir + bname, 'rb'))
+            target_influencers = pickle.load(open(influencer_dir + bname, 'rb'))
             target_influencers = list(target_influencers.keys())[:top_n]
             for influencer in target_influencers:
                 if influencer not in top_influencers:
@@ -179,7 +185,8 @@ def get_retweet_edges(top_influencers_map):
     return edges
 
 def get_full_retweet_edges(top_influencers_map):
-    conn = sqlite3.connect('/path/to/2016_election_sqlite3/data/complete_trump_vs_hillary_db.sqlite')
+    #conn = sqlite3.connect('/path/to/2016_election_sqlite3/data/complete_trump_vs_hillary_db.sqlite')
+    conn = sqlite3.connect(raw_retweets_2016)
     c = conn.cursor()
 
     edges = {}
@@ -268,7 +275,8 @@ def compute_similarity(edges):
 
 if __name__ == '__main__':
     print('Getting top influencers')
-    top_influencers, influencer_tags, keep_order = get_joined_top_n_by_news(top_n = 800) # 100, 200, 1000
+    #top_influencers, influencer_tags, keep_order = get_joined_top_n_by_news(top_n = 800) # 100, 200, 1000
+    top_influencers, influencer_tags, keep_order = get_top_n_by_news(top_n = 800) # 100, 200, 1000
 
     top_influencers_map = {}
     for influencer in top_influencers:
@@ -307,7 +315,7 @@ if __name__ == '__main__':
     del edges
 
     print('Computing edge similarities')
-
+    
     M, sims = compute_similarity(typed_edges)
 
     print('Max similarity:', np.max(sims))
@@ -322,4 +330,5 @@ if __name__ == '__main__':
     if len(influencer_tags) > 0:
         res['tags'] = influencer_tags
 
-    pickle.dump(res, open('/path/to/2016/sim_network/sim_network_joined_large.pkl', 'wb'))
+    makedirs(join(save_dir), exist_ok=True)
+    pickle.dump(res, open(join(save_dir, 'sim_network_joined_large_2016.pkl'), 'wb'))
