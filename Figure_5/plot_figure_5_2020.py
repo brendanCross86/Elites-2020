@@ -30,7 +30,7 @@ np.random.seed(seed)
 random.seed(seed)
 
 
-SIM_NETWORK_PATH = '../data/similarity/sim_network_joined_large_2020_v2.pkl' # 'data/2016/sim_network_large_with_figure3_influencers.pkl'
+SIM_NETWORK_PATH = '../data/similarity/sim_network_large_2020.pkl'
 RETWEET_GRAPH_JSON_PATH = lambda x: '../data/urls/{}/retweet_graphs_to_draw/retweet_graph_top_combined_topnum30.json'.format(x)
 SAVE_DIR = './output/'
 # create output dir
@@ -462,13 +462,6 @@ if __name__ == '__main__':
     year = 2020
     ignore_extreme_left = True
 
-    # BRENDAN
-    #data = pickle.load(open('data/sim_network_large.pkl', 'rb'))
-    #data = pickle.load(open('data/2020/sim_network_large.pkl', 'rb'))
-    #data = pickle.load(open('../' + str(year) + '/sim_network/sim_network_large.pkl', 'rb')) 
-    #data = pickle.load(open('../data/similarity/sim_network_large.pkl', 'rb'))
-    #data = pickle.load(open('../data/similarity/sim_network_large_2020_bren.pkl', 'rb'))
-
     data = pickle.load(open(SIM_NETWORK_PATH, 'rb'))
 
     M = data['sim_matrix'] 
@@ -482,12 +475,6 @@ if __name__ == '__main__':
     top_n = 5
     cateogry_list = {x: [''] * top_n for x in cateogry_list}
 
-    #if year == 2016:
-    #    node_info = json.load(open('data/retweet_graph_top_combined_topnum30_2016_UserFix.json'))
-    #elif year == 2020:
-    #    node_info = json.load(open('data/retweet_graph_top_combined_topnum30_2020.json'))
-    #    #node_info = json.load(open('data/retweet_graph_top_combined_topnum30_2016_UserFix.json'))
-    #node_info = json.load(open('../data/retweet_graph_top_combined_topnum30_2020.json'))
     node_info = json.load(open(RETWEET_GRAPH_JSON_PATH(year)))
 
     node_dict = {}

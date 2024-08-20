@@ -348,4 +348,4 @@ if __name__ == '__main__':
         res['tags'] = influencer_tags
 
     makedirs(join(save_dir), exist_ok=True)
-    pickle.dump(res, open(join(save_dir, 'sim_network_joined_large_2020.pkl'), 'wb'))
+    pickle.dump(res, open(join(save_dir, 'sim_network_large_2020.pkl'), 'wb'))

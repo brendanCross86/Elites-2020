@@ -30,7 +30,7 @@ np.random.seed(seed)
 random.seed(seed)
 
 
-SIM_NETWORK_PATH = '../data/similarity/sim_network_joined_large_2016_v1.pkl' # 'data/2016/sim_network_large_with_figure3_influencers.pkl'
+SIM_NETWORK_PATH = '../data/similarity/sim_network_large_2016.pkl'
 RETWEET_GRAPH_JSON_PATH = lambda x: '../data/urls/{}/retweet_graphs_to_draw/retweet_graph_top_combined_topnum30.json'.format(x)
 SAVE_DIR = './output/'
 # create output dir
@@ -472,14 +472,8 @@ def get_partition_stats(G, nodes, partition, node_dict):
 if __name__ == '__main__':
     year = 2016
     ignore_extreme_left = True
-
-    # data = pickle.load(open('../' + str(year) + '/sim_network/sim_network_large.pkl', 'rb'))
-    #data = pickle.load(open('../data/similarity/sim_network_large_with_figure3_influencers.pkl', 'rb'))
-    #data = pickle.load(open('../data/similarity/sim_network_large_with_figure3_influencers_bren_800.pkl', 'rb'))
-    data = pickle.load(open(SIM_NETWORK_PATH, 'rb'))
-    #data = pickle.load(open('../data/similarity/sim_network_large_joined_influencers_bren.pkl', 'rb'))
     
-    #data = pickle.load(open('temp_data/sim_network_large_with_figure3_influencers_noextra.pkl', 'rb'))
+    data = pickle.load(open(SIM_NETWORK_PATH, 'rb'))
 
     M = data['sim_matrix'] 
     nodes = data['nodes']
@@ -492,14 +486,7 @@ if __name__ == '__main__':
     top_n = 5
     cateogry_list = {x: [''] * top_n for x in cateogry_list}
 
-    #if year == 2016:
-    #    
-    #    node_info = json.load(open('data/retweet_graph_top_combined_topnum30_2016_UserFix.json'))
-    #elif year == 2020:
-    #    node_info = json.load(open('data/retweet_graph_top_combined_topnum30_2020.json'))
-
     node_info = json.load(open(RETWEET_GRAPH_JSON_PATH(year)))
-    #node_info = json.load(open('../data/retweet_graph_top_combined_topnum30_2016_UserFix.json'))
 
     node_dict = {}
     ci_weights = []
