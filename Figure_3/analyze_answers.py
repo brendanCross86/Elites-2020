@@ -140,7 +140,7 @@ def set_target_influencers(top_n = 25):
 
 if __name__ == '__main__':
     joined_influencers = set_target_influencers()
-    missing_users = pickle.load(open(join(user_data, 'missing_users.pkl'), 'rb'))
+    #missing_users = pickle.load(open(join(user_data, 'missing_users.pkl'), 'rb'))
 
     link_map = pickle.load(open(join(user_data, 'link_map.pkl'), 'rb'))
 
