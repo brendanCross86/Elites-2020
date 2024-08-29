@@ -19,6 +19,7 @@ from os import listdir, makedirs
 from os.path import isfile, join
 import collections
 import sys
+import json
 
 import numpy as np
 
@@ -26,9 +27,16 @@ from numba import njit
 from numba import types
 from numba.typed import Dict
 
-influencer_dir = '../data/influencers/top_100/'
+
+influencer_dir = '../data/influencers/top_100_anon/'
 raw_retweets_2020_dir = '/home/pub/hernan/Election_2020/joined_output_v2/retweets/' # "/path/to/raw/joined_output_v2/retweets/"
 save_dir = '../data/similarity'
+
+# this flag is true if the users will be anonymized in this files output.
+# if this flag is set, we expect the input data to have been anonymized as well.
+anonymized = True
+if anonymized:
+    user_id_to_anon_id = json.load(open('../data/maps/user_id_to_anon_id_extended.json','r'))
 
 biases = ['fake', 'right_extreme', 'right', 'right_leaning', 'center', 'left_leaning', 'left', 'left_extreme']
 
@@ -196,6 +204,15 @@ def get_full_retweet_edges(top_influencers_map):
                     rtid = int(line[1])
                     auth_id = int(line[2])
                     infl_id = int(line[3])
+
+                    if anonymized:
+                        # after getting the ids from the table, anonymize them so that they match the top100 influencer
+                        # data (which should also be anonymized)
+                        try:
+                            infl_id = user_id_to_anon_id[str(infl_id)]
+                            auth_id = user_id_to_anon_id[str(auth_id)]
+                        except:
+                            continue
 
                     # NOTE: Alternate conditionals
                     try: # infl_id must be one of the top influencer

@@ -22,13 +22,13 @@ from os import listdir, makedirs
 from os.path import isfile, join
 
 top_n = 100
-year = 2020 # 2016
+year = 2016 # 2016 2020
 biases = ['center', 'left', 'right', 'fake', 'left_leaning', 'right_leaning', 'left_extreme', 'right_extreme']
 
 #target_dir = "/path/to/generate_ci/graphs/" + str(year) + '/'
 # This is the path to the <bias>_<year>_ci.gt files, produced by compute_CI_retweet_networks.py script in Collective_Influence
 target_dir = "../data/ci_output/graphs/" + str(year) + '/'
-out_dir = '../data/influencers/new_top_100'
+out_dir = '../data/influencers/top_100'
 
 fnames = [f for f in listdir(target_dir) if isfile(join(target_dir, f))]
 
@@ -50,7 +50,6 @@ for fname in fnames:
 
         # print('Assembling CI list')
         res = []
-        print(graph.vp)
         for vertex in graph.vertices():
             res.append((graph.vp.CI_in[vertex], graph.vp.CI_out[vertex], graph.vp.user_id[vertex]))
 

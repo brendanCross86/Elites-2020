@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
 from itertools import cycle, islice
-
+import json
 import sys
 
 font = font_manager.FontProperties(family='Arial')
@@ -85,7 +85,8 @@ def get_data(classifications, category, year, top_n = 25):
 
     classification_count = {'media': 0, 'political': 0, 'independent': 0, 'other': 0}
     for influencer in top_n_influencers:
-        classification_count[classifications[influencer]] += 1
+        print(type(influencer))
+        classification_count[classifications[str(influencer)]] += 1
 
     return classification_count
 
@@ -139,121 +140,25 @@ def set_target_influencers(top_n = 25):
     return joined_influencers
 
 if __name__ == '__main__':
-    joined_influencers = set_target_influencers()
-    #missing_users = pickle.load(open(join(user_data, 'missing_users.pkl'), 'rb'))
 
-    link_map = pickle.load(open(join(user_data, 'link_map.pkl'), 'rb'))
-
-    #target_dir = 'answers/'
-    target_dir = infl_classification_surveys
-    fnames = [f for f in listdir(target_dir) if isfile(join(target_dir, f))]
-
-    print('=' * 60)
-    print('Loading data')
-    votes = {}
-    info = {}
-    for fname in fnames:
-        if '.xlsx' in fname:
-            print('Loading spreadsheet', fname)
-            df = pd.read_excel(target_dir + fname, engine='openpyxl')
-            
-            ids = df['id'].values
-            meida_link = df['linked to media outlet'].values
-            political_link = df['linked to political party'].values
-            independent = df['independent'].values
-            other = df['other'].values
-
-            full_names = df['full_name'].values
-            alignments = df['news categories'].values
-            links = df['link'].values
-
-            for i, id in enumerate(ids):
-                new_id = link_map[links[i]]
-
-                ids[i] = new_id
-
-            for i, id in enumerate(ids):
-                is_media = bool(meida_link[i])
-                is_political = bool(political_link[i])
-                is_independent = bool(independent[i])
-                is_other = bool(other[i])
-
-                if id not in info:
-                    info[id] = {'full name': full_names[i], 'news category': alignments[i], 'link': links[i]}
-
-                try:
-                    isnan = np.isnan(float(links[i]))
-                except:
-                    isnan = False
-
-                if not isnan:
-                    if 'jsolomonReports' in links[i]:
-                        is_media = 1000
-                    elif 'KellyannePolls' in links[i]:
-                        is_political = 1000
-                    elif 'FrankelJeremy' in links[i]:
-                        is_media = 1000
-                    elif 'dbongino' in links[i]:
-                        is_media = 1000
-                    elif 'TomFitton' in links[i]:
-                        is_media = 1000
-                    elif 'TAftermath2020' in links[i]:
-                        is_other = 1000
-                    elif 'JudgeJeaninefan' in links[i]:
-                        is_other = 1000
-                    elif 'RealMuckmaker' in links[i]:
-                        is_independent = 1000
-                    elif 'FedtheEffUp1' in links[i]:
-                        is_other = 1000
-                    elif 'j_starace' in links[i]:
-                        is_independent = 1000
-
-                if id not in votes:
-                    votes[id] = {'media': 0, 'political': 0, 'independent': 0, 'other': 0}
-                    votes[id]['media'] += int(is_media)
-                    votes[id]['political'] += int(is_political)
-                    votes[id]['independent'] += int(is_independent)
-                    votes[id]['other'] += int(is_other)
-                else:
-                    votes[id]['media'] += int(is_media)
-                    votes[id]['political'] += int(is_political)
-                    votes[id]['independent'] += int(is_independent)
-                    votes[id]['other'] += int(is_other)
-
-    print(len(votes), 'influencers scanned')
-
-    print('=' * 60)
-    print('Analyzing data')
+    affiliation_map = json.load(open('../data/maps/infl_affiliation_map_no_handles.json', 'r'))
+    influencers = [x for x in affiliation_map.keys()]
+    
     infl_classification = {}
-    output_data = {}
-    count = 0
-    for influencer in set(list(joined_influencers) + list(votes.keys())):
-        if influencer in votes:
-            infl_votes = votes[influencer]
-
-            # If tie, opt for media > political > independent > other 
-            vote_types = np.array(list(infl_votes.keys()))
-            vote_count = np.array(list(infl_votes.values()))
-            
-            if len(np.where(vote_count == np.max(vote_count))[0]) > 1:
-                print(influencer, 'has a tie:', votes[influencer])
-
-            output_data[influencer] = info[influencer]
-            output_data[influencer]['affiliation'] = vote_types[np.argmax(vote_count)]
-
-            infl_classification[influencer] = vote_types[np.argmax(vote_count)]
-            count += 1
-        else:
+    # simplify the classifications (media_2020 becomes media, poli_2016 becomes political, etc.)
+    for influencer, classification in affiliation_map.items():
+        if 'media' in classification:
+            infl_classification[influencer] = 'media'
+        elif 'polit' in classification:
+            infl_classification[influencer] = 'political'
+        elif 'indep' in classification:
+            infl_classification[influencer] = 'independent'
+        elif 'other' in classification:
             infl_classification[influencer] = 'other'
+        else:
+            print('There was an error, classification not found:', classification)
+            assert(False)
 
-    print(len(infl_classification))
-    # sys.exit()
-
-    print(count, 'classifications assigned out of', len(joined_influencers))
-
-    print(output_data)
-
-    # pickle.dump(output_data, open('output/survey_links_v6.pkl', 'wb'))
 
     print('=' * 60)
     print('Sorting data')

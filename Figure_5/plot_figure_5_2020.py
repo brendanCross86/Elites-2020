@@ -126,13 +126,6 @@ def _position_nodes(g, partition, **kwargs):
         pos_subgraph = nx.spring_layout(subgraph, k=0.10, weight='weight', **kwargs)
         pos.update(pos_subgraph)
 
-    # tmp_pos = {}
-    # for node, xy in pos.items():
-    #     if partition[node] == 0:
-    #         tmp_pos[node] = xy * 2
-    #     else:
-    #         tmp_pos[node] = xy * 2
-    # pos = tmp_pos.copy()
 
     return pos
 
@@ -461,6 +454,7 @@ def get_partition_stats(G, nodes, partition, node_dict):
 if __name__ == '__main__':
     year = 2020
     ignore_extreme_left = True
+    TOPNUM = 30 # the json file contains top 30 users per media category
 
     data = pickle.load(open(SIM_NETWORK_PATH, 'rb'))
 
@@ -471,6 +465,7 @@ if __name__ == '__main__':
     cateogry_list = ['far_left', 'left', 'lean_left', 'center', 'lean_right', 'right', 'far_right', 'fake']
     if ignore_extreme_left:
         cateogry_list.remove('far_left')
+    alignment_value_to_rank = {TOPNUM - i: i+1 for i in range(TOPNUM)}
 
     top_n = 5
     cateogry_list = {x: [''] * top_n for x in cateogry_list}
@@ -481,6 +476,7 @@ if __name__ == '__main__':
     ci_weights = []
     user_id_map = {}
     remove_later = []
+    user_to_ranks = {}
     for item in node_info['nodes']:
         user_id = item['userid']
         username = item['username']
@@ -498,13 +494,22 @@ if __name__ == '__main__':
         labels = []
         for alignment in item['proportions']:
             category = alignment['group']
+            value = alignment['value']
+
+            # convert value to rank
+            alignment_rank = alignment_value_to_rank[value]
 
             if ignore_extreme_left and (category == 'far_left' or category == 'extreme_bias_left'):
                 continue
 
             labels.append(category)
             fracs.append(alignment['value'])
-        
+
+            # these proportions define a users place in the top rankings of each media category, save
+            # this information if the rank is in the top 5. 
+            if alignment_rank <= top_n:
+                cateogry_list[category][alignment_rank - 1] = user_id
+
         fracs = np.array(fracs)
         fracs = fracs / np.sum(fracs)
 
@@ -513,19 +518,10 @@ if __name__ == '__main__':
         if len(labels) == 0:
             continue
 
-        if grouprank in cateogry_list:
-            if rank <= top_n:
-                cateogry_list[grouprank][rank - 1] = user_id
 
         ci_weights.append(ci_weight)
         node_dict[user_id] = {'ci_weight': ci_weight, 'rank': rank, 'colors': colors, 'fracs': fracs, 'labels': labels}
 
-    cateogry_list['left'][2] = 32871086
-    cateogry_list['center'][3] = 32871086
-    cateogry_list['lean_right'][2] = 39344374
-    cateogry_list['lean_right'][4] = 25073877
-    cateogry_list['right'][0] = 39344374
-    cateogry_list['far_right'][3] = 38495835
 
     count = 1
     cateogry_list_order = {}
@@ -534,7 +530,6 @@ if __name__ == '__main__':
             if rank not in cateogry_list_order:
                 cateogry_list_order[rank] = count
                 count += 1
-
 
     ci_weights = np.array(ci_weights).reshape(-1, 1)
     scalar = MinMaxScaler((0.4, 2.5))
@@ -568,17 +563,9 @@ if __name__ == '__main__':
     left_tag = mpatches.Patch(color='#0E538F', label='Left')
     extreme_bias_left_tag = mpatches.Patch(color='#082E4F', label='Extreme bias\n left')
 
-    # partition = random_partitition(G, k=2)
-
-    # partition = nx.algorithms.community.kernighan_lin_bisection(G, max_iter=500, seed=seed)
-    # tmp_partition = {}
-    # for i, comm in enumerate(partition):
-    #     for node in comm:
-    #         tmp_partition[node] = i
-    # partition = tmp_partition.copy()
 
     partition = community_louvain.best_partition(G, random_state=seed)
-    print(partition)
+    #print(partition)
     tmp_partition = {}
     for node, comm in partition.items():
         if comm != 1:
@@ -595,11 +582,6 @@ if __name__ == '__main__':
     labels = nx.get_node_attributes(G, 'community') 
     
     pos = community_layout(G, partition)
-
-    #tmp_pos = {}
-    #for node, xy in pos.items():
-    #    tmp_pos[node] = xy * 10
-    #pos = tmp_pos.copy()
     pos = community_based_pos(pos, partition)
 
     edge_colors = ['#999'] * len(G.edges())
@@ -608,49 +590,10 @@ if __name__ == '__main__':
     # G = remove_graph_edges(G, partition)
     G = cap_node_degree(G, partition)
 
-    # target_orders = [6, 7, 11, 3, 16, 24] # Reposition some nodes with labels to be in a place that makes the labels more visible
-    # cateogry_list_order_keys = list(cateogry_list_order.keys())
-    # cateogry_list_order_values = list(cateogry_list_order.values())
-
-    # for order in target_orders:
-    #     ind = cateogry_list_order_values.index(order)
-    #     user_id = cateogry_list_order_keys[ind]
-    #     node = nodes.index(user_id)
-    #     if order == 3 or order == 16 or order == 24:
-    #         pos[node] = pos[node] * 1.7
-    #     else:
-    #         pos[node] = pos[node] * 2
-            
-
-
     print(list(nx.isolates(G)))
 
-    # weights = {(u,v): G[u][v]['weight'] for u,v in G.edges()}
-    # print(len(G.nodes()), len(G.edges()))
-    # pickle.dump(weights, open("output/2020_edge_weights.pkl", "wb"))
-
-    #pickle.dump(G, open("regen_output/2020_figure_network.pkl", "wb"))
     pickle.dump(G, open(join(SAVE_DIR, "2020_figure_network.pkl"), "wb"))
     
-
-    # for c in sorted(nx.connected_components(G), key=len, reverse=True):
-    #     if len(c) < 9:
-    #         for node in c:
-    #             x = -0.9511019
-    #             y = 18.63289746
-    #             pos[node] = np.array([x, y])
-
-    # target_node = nodes[nodes.index(list(cateogry_list_order.keys())[0])]
-
-    # print(target_node, user_id_map[target_node])
-
-    # fig = plt.figure()
-    # ax = plt.axes()
-
-    # nx.draw(G, pos, node_color=node_colors, edge_color = edge_colors, node_size = node_sizes)
-    
-    # thickness = get_edge_thickness(G, partition)
-    # nx.draw_networkx_edges(G, pos=pos, edge_color = edge_colors, width=thickness)
 
     edge_colors = get_edge_colors_community(G, partition)
     nx.draw_networkx_edges(G, pos=pos, edge_color = edge_colors, width=0.5, alpha=0.6)
@@ -675,10 +618,11 @@ if __name__ == '__main__':
         if user_id in cateogry_list_order:
             rank_labels[0] = str(cateogry_list_order[user_id])
         
+
         a = plt.pie(
             fracs, # s.t. all wedges have equal size
             labels = rank_labels,
-            textprops={'color': 'green', 'fontsize': 6, 'ha': 'center', 'va': 'top', 'x': pos[node][0], 'y': pos[node][1] + 2, 'weight': 'bold', 'family':'Arial'},
+            textprops={'color': 'green', 'fontsize': 6, 'ha': 'center', 'va': 'top', 'x': pos[node][0], 'y': pos[node][1] + 2, 'weight': 'bold'},#, 'family':'Arial'},
             center=pos[node], 
             colors = colors,
             radius=radius)
@@ -688,7 +632,7 @@ if __name__ == '__main__':
     # else:
     #     plt.legend(loc='upper right', prop={'family':'Arial'}, handles=[fake_tag, extreme_bias_right_tag, right_tag, lean_right_tag, center_tag, lean_left_tag, left_tag, extreme_bias_left_tag])
     
-    print(colors_to_node)
+    #print(colors_to_node)
 
     #lim_range = 40
     lim_range = 40

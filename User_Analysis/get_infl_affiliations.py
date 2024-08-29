@@ -92,8 +92,7 @@ def set_target_influencers(top_n = 25):
 if __name__ == '__main__':
     joined_influencers, top_influencers_2016, top_influencers_2020 = set_target_influencers()
     #missing_users = pickle.load(open('user_profiles/missing_users.pkl', 'rb'))
-
-    link_map = pickle.load(open(join(MAPS_DIR, 'link_map.pkl'), 'rb'))
+    #link_map = pickle.load(open(join(MAPS_DIR, 'link_map.pkl'), 'rb'))
 
     fnames = [f for f in listdir(ANSWER_DIR) if isfile(join(ANSWER_DIR, f))]
 
@@ -112,14 +111,13 @@ if __name__ == '__main__':
             independent = df['independent'].values
             other = df['other'].values
 
-            full_names = df['full_name'].values
-            alignments = df['news categories'].values
-            links = df['link'].values
+            #full_names = df['full_name'].values
+            #alignments = df['news categories'].values
+            #links = df['link'].values
 
-            for i, id in enumerate(ids):
-                new_id = link_map[links[i]]
-
-                ids[i] = new_id
+            #for i, id in enumerate(ids):
+            #    new_id = link_map[links[i]]
+            #    ids[i] = new_id
 
             for i, id in enumerate(ids):
                 is_media = bool(meida_link[i])
@@ -127,34 +125,35 @@ if __name__ == '__main__':
                 is_independent = bool(independent[i])
                 is_other = bool(other[i])
 
-                if id not in info:
-                    info[id] = {'full name': full_names[i], 'news category': alignments[i], 'link': links[i]}
+                #if id not in info:
+                #    info[id] = {'full name': full_names[i], 'news category': alignments[i], 'link': links[i]}
 
                 try:
                     isnan = np.isnan(float(links[i]))
                 except:
                     isnan = False
 
+
                 if not isnan:
-                    if 'jsolomonReports' in links[i]:
+                    if id == 2025317:
                         is_media = 1000
-                    elif 'KellyannePolls' in links[i]:
+                    elif id == 3436929:
                         is_political = 1000
-                    elif 'FrankelJeremy' in links[i]:
+                    elif id == 1517960:
                         is_media = 1000
-                    elif 'dbongino' in links[i]:
+                    elif id == 2738861:
                         is_media = 1000
-                    elif 'TomFitton' in links[i]:
+                    elif id == 776729:
                         is_media = 1000
-                    elif 'TAftermath2020' in links[i]:
+                    elif id == 910429:
                         is_other = 1000
-                    elif 'JudgeJeaninefan' in links[i]:
+                    elif id == 2075698:
                         is_other = 1000
-                    elif 'RealMuckmaker' in links[i]:
+                    elif id == 2473454:
                         is_independent = 1000
-                    elif 'FedtheEffUp1' in links[i]:
+                    elif id == 223297:
                         is_other = 1000
-                    elif 'j_starace' in links[i]:
+                    elif id == 4689768:
                         is_independent = 1000
 
                 if id not in votes:
@@ -170,6 +169,7 @@ if __name__ == '__main__':
                     votes[id]['other'] += int(is_other)
 
     print(len(votes), 'influencers scanned')
+
 
     print('=' * 60)
     print('Analyzing data')
@@ -187,8 +187,8 @@ if __name__ == '__main__':
             if len(np.where(vote_count == np.max(vote_count))[0]) > 1:
                 print(influencer, 'has a tie:', votes[influencer])
 
-            output_data[influencer] = info[influencer]
-            output_data[influencer]['affiliation'] = vote_types[np.argmax(vote_count)]
+            #output_data[influencer] = info[influencer]
+            #output_data[influencer]['affiliation'] = vote_types[np.argmax(vote_count)]
 
             infl_classification[influencer] = vote_types[np.argmax(vote_count)]
             count += 1
@@ -214,4 +214,15 @@ if __name__ == '__main__':
     
 
     with open(join(SAVE_DIR, "infl_affiliation_map_no_handles.json"), "w") as outfile:
+        json.dump(infl_classification_json, outfile)
+
+
+    # also create a version that has the user handles of allowed users
+    
+    allowed_users = json.load(open(join(MAPS_DIR, 'allowed_users_anon_id_to_handle.json')))
+    for influencer in infl_classification_json:
+        if str(influencer) in allowed_users:
+            infl_classification_json[influencer] = allowed_users[str(influencer)]
+
+    with open(join(SAVE_DIR, "infl_affiliation_map.json"), "w") as outfile:
         json.dump(infl_classification_json, outfile)

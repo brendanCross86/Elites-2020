@@ -24,10 +24,17 @@ import sqlite3
 from numba import njit
 from numba import types
 from numba.typed import Dict
+import json
 
-influencer_dir = '../data/influencers/top_100/'
+influencer_dir = '../data/influencers/top_100_anon/'
 raw_retweets_2016 = '/home/pub/hernan/Election_2016/complete_trump_vs_hillary_db.sqlite' # '/path/to/2016_election_sqlite3/data/complete_trump_vs_hillary_db.sqlite'
 save_dir = '../data/similarity'
+
+# this flag is true if the users will be anonymized in this files output.
+# if this flag is set, we expect the input data to have been anonymized as well.
+anonymized = True
+if anonymized:
+    user_id_to_anon_id = json.load(open('../data/maps/user_id_to_anon_id_extended.json','r'))
 
 biases = ['fake', 'right_extreme', 'right', 'right_leaning', 'center', 'left_leaning', 'left', 'left_extreme']
 
@@ -192,9 +199,19 @@ def get_full_retweet_edges(top_influencers_map):
     edges = {}
     full_auth_list = []
     for row in c.execute('SELECT * FROM tweet_to_retweeted_uid'):
+        
         infl_id = row[1]
         auth_id = row[2]
         
+        if anonymized:
+            # after getting the ids from the table, anonymize them so that they match the top100 influencer
+            # data (which should also be anonymized)
+            try:
+                infl_id = user_id_to_anon_id[str(infl_id)]
+                auth_id = user_id_to_anon_id[str(auth_id)]
+            except:
+                continue
+
         # NOTE: Alternate conditionals
         try: # infl_id must be one of the top influencer
             check = top_influencers_map[infl_id]

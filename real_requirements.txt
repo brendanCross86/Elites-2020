@@ -1,0 +1,16 @@
+beautifulsoup4==4.12.3
+dask==2024.8.0
+floweaver==2.0.1
+ipysankeywidget==0.5.0
+lxml==5.2.1
+matplotlib==3.6.3
+matplotlib-inline==0.1.7
+networkit==11.0
+networkx==3.3
+numba==0.60.0
+numpy==1.26.0
+pandas==2.2.2
+pycairo==1.25.1
+python-louvain==0.16
+scikit-learn==1.5.1
+wheel==0.44.0

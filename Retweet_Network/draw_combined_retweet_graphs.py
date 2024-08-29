@@ -22,7 +22,7 @@ import pandas as pd
 import numpy as np
 
 
-year = '2016'#'2020'
+year = '2020' #'2020' '2016
 save_dir =  '../data/urls/{}/'.format(year)
 network_dir = '../data/ci_output/graphs/{}/'.format(year)
 

@@ -472,7 +472,8 @@ def get_partition_stats(G, nodes, partition, node_dict):
 if __name__ == '__main__':
     year = 2016
     ignore_extreme_left = True
-    
+    TOPNUM = 30 # the json file contains top 30 users per media category
+
     data = pickle.load(open(SIM_NETWORK_PATH, 'rb'))
 
     M = data['sim_matrix'] 
@@ -482,6 +483,7 @@ if __name__ == '__main__':
     cateogry_list = ['far_left', 'left', 'lean_left', 'center', 'lean_right', 'right', 'far_right', 'fake']
     if ignore_extreme_left:
         cateogry_list.remove('far_left')
+    alignment_value_to_rank = {TOPNUM - i: i+1 for i in range(TOPNUM)}
 
     top_n = 5
     cateogry_list = {x: [''] * top_n for x in cateogry_list}
@@ -505,6 +507,10 @@ if __name__ == '__main__':
         labels = []
         for alignment in item['proportions']:
             category = alignment['group']
+            value = alignment['value']
+
+            # convert value to rank
+            alignment_rank = alignment_value_to_rank[value]
 
             if ignore_extreme_left and (category == 'far_left' or category == 'extreme_bias_left'):
                 continue
@@ -512,6 +518,11 @@ if __name__ == '__main__':
             labels.append(category)
             fracs.append(alignment['value'])
         
+            # these proportions define a users place in the top rankings of each media category, save
+            # this information if the rank is in the top 5. 
+            if alignment_rank <= top_n:
+                cateogry_list[category][alignment_rank - 1] = user_id
+
         fracs = np.array(fracs)
         fracs = fracs / np.sum(fracs)
 
@@ -520,18 +531,9 @@ if __name__ == '__main__':
         if len(labels) == 0:
             continue
 
-        if grouprank in cateogry_list:
-            if rank <= top_n:
-                cateogry_list[grouprank][rank - 1] = user_id
-
         ci_weights.append(ci_weight)
         node_dict[user_id] = {'ci_weight': ci_weight, 'rank': rank, 'colors': colors, 'fracs': fracs, 'labels': labels}
 
-    cateogry_list['lean_right'][3] = 25073877
-    cateogry_list['right'][1] = 25073877
-    cateogry_list['right'][3] = 14669951
-    cateogry_list['far_right'][4] = 14669951
-    cateogry_list['fake'][4] = 25073877
 
     count = 1
     cateogry_list_order = {}

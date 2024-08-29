@@ -35,11 +35,11 @@ def load_graph_csv(file, stance, year, for_ci = True):
             line = line.split(',')
 
             if year == 2020:
-                # infid, authid, tid
-                edge_list.append((line[2], line[1], line[0]))
+                # 2020 edgelists are ordered: tweet_id, author_id, influencer_id
+                edge_list.append((line[2], line[1], line[0])) # infid, authid, tid
             elif year == 2016:
-                # infid, authid, tid
-                edge_list.append((line[0], line[1], line[2]))
+                # 2016 edgelists are ordered: influencer_id, author_id, tweet_id
+                edge_list.append((line[0], line[1], line[2])) # infid, authid, tid
 
     print('Loading graph')
     G = gt.Graph(directed=True)
@@ -54,11 +54,11 @@ def load_graph_csv(file, stance, year, for_ci = True):
         gtg.remove_parallel_edges(G)
         gtg.remove_self_loops(G)
 
-    G.save('../data/' + str(year) + '/' + stance + '_' + str(year) + '.gt')
+    G.save(BASE_PATH + str(year) + '/' + stance + '_' + str(year) + '.gt')
 
 if __name__ == '__main__':
     # EDIT THIS
-    base_path = '../data/'
+    #base_path = BASE_PATH # '../data/'
 
     years = [2016, 2020]
     #years = [2016]#[2020]
@@ -68,6 +68,6 @@ if __name__ == '__main__':
 
     for year in years:
         for stance in stances:
-            fname = base_path + str(year) + '/' + stance + '_' + 'retweet_edges.csv'
+            fname = BASE_PATH + str(year) + '/' + stance + '_' + 'retweet_edges.csv'
             print(fname)
             load_graph_csv(fname, stance, year)

@@ -19,6 +19,10 @@ USER_PROFILE_DIR = './user_profiles/'
 SAVE_DIR = '../data/maps/'
 biases = ['fake', 'right_extreme', 'right', 'right_leaning', 'center', 'left_leaning', 'left', 'left_extreme']
 
+ANONYMOUS_MAP = '../data/maps/'
+anonymized = True
+
+
 def get_target_influencers(top_n = 25):
     #btarget_dir = "/home/flamij/ci/ci/analysis/top_100_influencer_pkls/"
     btarget_dir = INFLUENCER_DIR
@@ -78,6 +82,12 @@ if __name__ == '__main__':
     top_influencers_2020, influencer_tags_2020, top_influencers_2016, influencer_tags_2016 = get_target_influencers()
     total_influencers = list(set(top_influencers_2020 + top_influencers_2016))
     
+    
+
+    if anonymized:
+        users_to_anon = json.load(open(join(ANONYMOUS_MAP, 'user_id_to_anon_id.json'), 'r'))
+        
+
     print('2020', len(set(top_influencers_2020)))
     print('2016', len(set(top_influencers_2016)))
 
@@ -89,6 +99,12 @@ if __name__ == '__main__':
     count = 0
     link_map = {}
     for influencer in total_influencers:
+
+        if anonymized:
+            # the user_profile data is not anonymized, if the top influencer data is anonymized, we will map
+            # the anonimized id back to the twitter id.
+            influencer = users_to_anon[influencer]
+
         if influencer in user_profiles:
             profile = user_profiles[influencer]
 

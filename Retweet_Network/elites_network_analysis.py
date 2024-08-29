@@ -17,10 +17,13 @@ from scipy.cluster.hierarchy import linkage, fcluster
 from scipy.spatial.distance import squareform
 from math import pi, sin, cos, radians
 
-WORKING_DIR = '/home/crossb/working'
+WORKING_DIR = '~/working'
 NUM_WORKERS = 32
 THREADS_PER_WORKER = 2
-Election_2020_dir = '/home/pub/hernan/Election_2020/joined_output'
+
+OUT_DIR = '../data/influencers/'
+os.makedirs(OUT_DIR, exist_ok=True)
+
 
 BIAS_TO_RETWEET_NETWORKS = {
     'Center news': os.path.join(WORKING_DIR, '', 'Center news_retweet_edges.csv'),
@@ -511,7 +514,7 @@ def influence_gain(graphs_2016, graphs_2020, N=100, plot=False):
         bias_stats['verified'] = bias_stats.user_id.apply(verified_map)
         bias_stats = bias_stats.sort_values(by='delta', ascending=False)
 
-        bias_stats.to_csv('./top_influencers_{}.csv'.format(bias), index=False)
+        bias_stats.to_csv(os.path.join(OUT_DIR, 'top_influencers_{}.csv'.format(bias)), index=False)
         if plot:
             # rank stuff
             bias_stats = bias_stats[(bias_stats['rank_2020'] >= 30) | (bias_stats['rank_2016'] >= 30)]
@@ -537,7 +540,7 @@ def influence_gain(graphs_2016, graphs_2020, N=100, plot=False):
     if plot:
         plot_influence_gain(user_stats, N, 'Largest Change in Influence Combined',
                             'delta_influence_stem_{}'.format('combined'))
-    user_stats.to_csv('./top_influencers.csv', index=False)
+    user_stats.to_csv(os.path.join(OUT_DIR, 'top_influencers.csv'), index=False)
     #sankey_data(user_stats, 'combined')
 
     # create a csv that has a feature per bias and the rows are users and their normalized delta ci per bias

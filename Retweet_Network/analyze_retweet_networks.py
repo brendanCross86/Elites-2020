@@ -20,7 +20,7 @@ import graph_tool.all as gt
 
 # Modify year to run for 2016 and 2020
 periods = ['june-nov']
-year = '2020'
+year = '2016' # '2016' '2020'
 
 save_dir = '../data/urls/{}/'.format(year)
 network_dir = '../data/ci_output/graphs/{}/'.format(year)
@@ -144,8 +144,10 @@ t0 = time.time()
 media_types = {
     '2020': ['fake', 'right_extreme', 'right', 'right_leaning',
              'center', 'left_leaning', 'left', 'left_extreme'],
-    '2016': ['fake', 'extreme_bias_right', 'right', 'lean_right',
-             'center', 'lean_left', 'left', 'extreme_bias_left']
+    '2016': ['fake', 'right_extreme', 'right', 'right_leaning',
+             'center', 'left_leaning', 'left', 'left_extreme'],
+    #'2016': ['fake', 'extreme_bias_right', 'right', 'lean_right',
+    #         'center', 'lean_left', 'left', 'extreme_bias_left']
                }
 
 for media_type in media_types[year]:
