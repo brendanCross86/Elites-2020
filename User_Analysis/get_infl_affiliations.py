@@ -20,7 +20,6 @@ font = font_manager.FontProperties(family='Arial')
 
 
 INFLUENCER_DIR = '../data/influencers/top_100/'
-USER_PROFILE_DIR = './user_profiles/'
 ANSWER_DIR = '../data/survey_answers/'
 MAPS_DIR = '../data/maps/'
 SAVE_DIR = '../data/maps/'
