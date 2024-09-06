@@ -32,7 +32,8 @@ save_dir = '../data/similarity'
 
 # this flag is true if the users will be anonymized in this files output.
 # if this flag is set, we expect the input data to have been anonymized as well.
-anonymized = True
+# if regenerating from raw data, set the flag to false. 
+anonymized = False
 if anonymized:
     user_id_to_anon_id = json.load(open('../data/maps/user_id_to_anon_id_extended.json','r'))
 
