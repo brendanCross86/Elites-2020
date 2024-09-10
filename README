@@ -31,8 +31,13 @@ To generate the intermediary files:
                of disk space. The final step of merging retweet and tweet edges requires the workers have adequet disk space.
           iii) Previously generated versions of these files exist in the Retweet_Network folder of the OSF data repository.
         
-        Output: This code will generate the url classified edgelists of the retweet network, for use in CI calculations. Thes files are called: <bias>_retweet_edges.csv, there is one for each bias.
+        Output: This code will generate the url classified edgelists for the 2020 retweet network, for use in CI calculations. These files are called: <bias>_retweet_edges.csv, there is one for each bias.
         NOTE: We apply anonymization after this step, produced retweet edges and tweet ids are all anonymized.
+
+        b) Run create_2016_retweet_networks.py
+            i) Set the tweet_db_file1, tweet_db_file2, and urls_db_file variables to point to the correct sqlite databsae files
+           ii) Set the save_dir to a path for the 2016 networks. NOTE: this should be exactly the same path as the 2020 networks, since the files share a name. Ideally have a 2016 and 2020 directory for each set of retweet networks.
+        Output: This script will generate the url classified edgelist for the 2016 retweet networks. The files are named <bias>_retweet_edges.csv
 
 
     2) Compute Collective Influence:
