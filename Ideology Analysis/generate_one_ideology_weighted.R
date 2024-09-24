@@ -248,9 +248,10 @@ CA <- function (obj, nd = NA, suprow = NA, supcol = NA, subsetrow = NA,
 ##### GENERATE IDEOLOGY FOR VARIOUS THRESHOLDS ######
 ############### PARAMETERS: WEIGHT THRESHOLD, NUMBER OF CONNECTIONS ##########
 ####################################################
-influencers=fread("top_100_influencers_2020.csv")
+#influencers=fread("top_100_influencers_2020.csv")
+influencers=fread("anon_all_influencers_data_2020.csv")
 influencers=as.character(influencers$id)
-data=fread("ideology_retweet_network.csv", header=T)
+data=fread("anon_ideology_retweet_network.csv", header=T)
 data$retweet_id=NULL
 colnames(data)=c("tweet_id","author_uid","retweeted_uid")
 edge_list=data

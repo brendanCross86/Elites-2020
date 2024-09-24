@@ -92,7 +92,7 @@ To generate the intermediary files:
            ii) point ANSWER_DIR to the survey answers in the OSF data repository
           iii) point MAPS_DIR to the location of allowed_users_anon_id_to_handle.json
         
-            Output: infl_affiliation_map_no_handles.json, infl_affiliation_map_no_handles.pkl
+            Output: infl_affiliation_map.json, infl_affiliation_map_no_handles.pkl
 
     6) Generate Similarity Matrix:
         Note: these scripts live in the Similarity_Matrix folder in the OSF repository.
@@ -108,6 +108,19 @@ To generate the intermediary files:
 
         Output: sim_network_large_2016.pkl and sim_network_large_2020.pkl, used by Figure 5
 
+
+    7) Ideology Analysis
+        Note: these scripts live in the Ideology Analysis folder in the OSF repository.
+        a) merge_top_influencers.py
+            i) point AFFILIATION_MAP to the location o fhte infl_affiliation_map.json file produced in step 5
+           ii) point the TOP_INFLUENCERS to the location of the top_influencer_<bias>.csv files produced by the elites_network_analysis.py script (step 4).
+        Output: anon_all_influencers_data_<2016|2020>.csv, anon_all_top_5_cat_<2016|2020>.csv
+
+
+        b) generate_one_ideology_weighted.R
+            i) point influencers variable to read the anon_all_influencers_data_2020.csv file produced in the previous step
+           ii) point the data variable to the anon_ideology_retweet_network.csv file
+        Output: CA_weighted_analysis_<2016|2020>_n_link_3_reduced_infl.Rdata, weighted_interaction_matrix_<2016|2020>_3_reduced_infl.Rdata
 
 The above steps will generate all intermediary files necessary to plot the figures from the paper. Next, for each figure we will provide a quick overview on what data the figure needs and how to run the scripts to plot it.
 
@@ -154,6 +167,8 @@ Generating Figure 5:
         The figure generated in the paper originally had a manual step where the two similarity network pdfs were merged into one figure and the top influencer tables added by hand. When adding the tables there was an error where the (12) was added to right leaning influencer 3. This likely occurred because this same user had (12) in the extreme bias right category.
 
 
-
-
+Generating Figure 6:
+    1) figure_5_reproducability.R
+        a) Need to point the ideology_file, interaction_file, top_5_cat, influencers_data variables all to the output produced by the Influencer Analysis step in the intermediary file generation guide. 
+            
     
